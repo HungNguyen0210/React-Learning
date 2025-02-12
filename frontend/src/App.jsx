@@ -3,16 +3,7 @@ import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
 import { useDebounce } from "react-use";
-
-const API_BASE_URL = "https://api.themoviedb.org/3";
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const API_OPTIONS = {
-  method: "GET",
-  headers: {
-    accept: "application/json",
-    Authorization: `Bearer ${API_KEY}`,
-  },
-};
+import api from "./api/axiosClient.js";
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,29 +16,16 @@ const App = () => {
   const fetchMovies = async (query = "") => {
     setIsLoading(true);
     setErrorMessage("");
+
     try {
-      const endpoint = query
-        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query ? `/movies/search?query=${query}` : `/movies`;
 
-      const response = await fetch(endpoint, API_OPTIONS);
+      const { data } = await api.get(endpoint); // Gọi API bằng instance
 
-      if (!response.ok) {
-        throw new Error("Fail to fetch movies");
-      }
-
-      const data = await response.json();
-
-      if (data.Response === "false") {
-        setErrorMessage(data.Error || "Failed to fetch movies");
-        setMovieList([]);
-        return;
-      }
-      console.log(data);
       setMovieList(data.results || []);
     } catch (error) {
-      console.log(`Error fetching movies: ${error}`);
-      setErrorMessage("Error fetching movies. Please try again later");
+      console.error(`Error fetching movies:`, error);
+      setErrorMessage("Error fetching movies. Please try again later.");
     } finally {
       setIsLoading(false);
     }
