@@ -21,8 +21,8 @@ const App = () => {
       const endpoint = query ? `/movies/search?query=${query}` : `/movies`;
 
       const { data } = await api.get(endpoint); // Gọi API bằng instance
-
-      setMovieList(data.results || []);
+      console.log("API response: ", data);
+      setMovieList(data.data.results || []);
     } catch (error) {
       console.error(`Error fetching movies:`, error);
       setErrorMessage("Error fetching movies. Please try again later.");
